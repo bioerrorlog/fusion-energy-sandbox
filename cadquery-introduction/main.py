@@ -35,4 +35,7 @@ if __name__ == "__main__":
     # show(spine_solid())
     # show(cut_spline())
     # show(assembly())
+
     assembly().export('my-cad-geometry.step')
+    loaded_shape = cq.importers.importStep('my-cad-geometry.step')
+    show(loaded_shape)
