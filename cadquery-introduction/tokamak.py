@@ -77,13 +77,17 @@ def main():
     plasma, layers, offset = build_layers()
     z_max = KAPPA * A + offset
 
+    # Divertor: carve the lower region out of first_wall + blanket, then
+    # remove that region from the donor layers so nothing overlaps.
+    block = revolve(rect(R0 - 40, R0 + 90, -z_max - 50, -KAPPA * A * 0.55))
+    divertor = layers["first_wall"].union(layers["blanket"]).intersect(block)
+    for name in ("first_wall", "blanket"):
+        layers[name] = layers[name].cut(block)
+
     asm = cq.Assembly(plasma, name="plasma", color=cq.Color("magenta"))
     for name, _, color in RADIAL_BUILD:
         asm.add(layers[name], name=name, color=cq.Color(color))
 
-    # Divertor: carve the lower region by intersecting with a revolved rectangle
-    block = revolve(rect(R0 - 40, R0 + 90, -z_max - 50, -KAPPA * A * 0.55))
-    divertor = layers["first_wall"].union(layers["blanket"]).intersect(block)
     asm.add(divertor, name="divertor", color=cq.Color("red"))
 
     # Place 7 TF coils in the toroidal direction
