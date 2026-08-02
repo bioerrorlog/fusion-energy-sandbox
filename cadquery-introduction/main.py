@@ -34,4 +34,5 @@ if __name__ == "__main__":
     # show(circle_solid())
     # show(spine_solid())
     # show(cut_spline())
-    show(assembly())
+    # show(assembly())
+    assembly().export('my-cad-geometry.step')
