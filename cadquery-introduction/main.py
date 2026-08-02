@@ -2,12 +2,12 @@ import cadquery as cq
 from cadquery.vis import show
 
 
-def circle_solid():
+def circle_solid() -> cq.Workplane:
     circle_solid = cq.Workplane("XY").circle(1.0).extrude(3.0)
-    show(circle_solid)
+    return circle_solid
 
 
-def spine_solid():
+def spine_solid() -> cq.Workplane:
     xyz_coordinates = [
         (-1.0, -2.0),
         (-0.5, 2.0),
@@ -15,9 +15,15 @@ def spine_solid():
         (2.0, 2.0),
     ]
     spine_solid = cq.Workplane("XY").spline(listOfXYTuple=xyz_coordinates, periodic=True).close().extrude(0.5)
-    show(spine_solid)
+    return spine_solid
+
+
+def cut_spline() -> cq.Workplane:
+    cut_spline = spine_solid().cut(circle_solid())
+    return cut_spline
 
 
 if __name__ == "__main__":
-    # circle_solid()
-    spine_solid()
+    # show(circle_solid())
+    # show(spine_solid())
+    show(cut_spline())
