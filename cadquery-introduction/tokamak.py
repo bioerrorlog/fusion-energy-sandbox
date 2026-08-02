@@ -2,6 +2,8 @@ import numpy as np
 import cadquery as cq
 from cadquery.vis import show
 
+# (R, Z) points of a closed cross-section on the XZ plane
+Points = list[tuple[float, float]]
 
 # Parameters (cm)
 R0 = 300        # major radius
@@ -11,7 +13,7 @@ DELTA = 0.55    # triangularity (negative values give a negative-triangularity s
 ANGLE = 270     # revolve angle; 360 for a full torus
 
 # Inner to outer: (name, thickness, color)
-RADIAL_BUILD = [
+RADIAL_BUILD: list[tuple[str, int, str]] = [
     ("sol",         20, "lightgray"),   # scrape-off layer
     ("first_wall",   5, "gray"),
     ("blanket",     60, "orange"),      # tritium breeding blanket
@@ -20,7 +22,7 @@ RADIAL_BUILD = [
 ]
 
 
-def profile(offset):
+def profile(offset: float) -> Points:
     """(R, Z) points of a Miller plasma cross-section expanded outward by offset."""
     t = np.linspace(0, 2 * np.pi, 120, endpoint=False)
     r = R0 + (A + offset) * np.cos(t + DELTA * np.sin(t))
@@ -28,7 +30,7 @@ def profile(offset):
     return list(zip(r.tolist(), z.tolist()))
 
 
-def revolve(points):
+def revolve(points: Points) -> cq.Workplane:
     """Revolve a closed profile on the XZ plane about the global Z axis.
 
     In Workplane("XZ") the local y axis is the global Z, so the rotation axis
@@ -40,15 +42,16 @@ def revolve(points):
             .revolve(ANGLE, (0, 0, 0), (0, 1, 0)))
 
 
-def rect(r_min, r_max, z_min, z_max):
+def rect(r_min: float, r_max: float, z_min: float, z_max: float) -> Points:
     """Helper that builds a rectangular cross-section in absolute coordinates."""
     return [(r_min, z_min), (r_min, z_max), (r_max, z_max), (r_max, z_min)]
 
 
-def build_layers():
+def build_layers() -> tuple[cq.Workplane, dict[str, cq.Workplane], int]:
     """Stack up radial_build and carve each layer as outer minus inner."""
     plasma = revolve(profile(0))
-    layers, prev, offset = {}, plasma, 0
+    layers: dict[str, cq.Workplane] = {}
+    prev, offset = plasma, 0
     for name, thickness, _ in RADIAL_BUILD:
         offset += thickness
         outer = revolve(profile(offset))
@@ -57,9 +60,10 @@ def build_layers():
     return plasma, layers, offset
 
 
-def tf_coil(r_in, r_out, z_half, leg, width):
+def tf_coil(r_in: float, r_out: float, z_half: float,
+            leg: float, width: float) -> cq.Workplane:
     """A single rectangular TF coil: cut the inner frame out of the outer one."""
-    def slab(pts):
+    def slab(pts: Points) -> cq.Workplane:
         return (cq.Workplane("XZ", origin=(0, width / 2, 0))
                 .polyline(pts).close().extrude(width))
 
@@ -68,12 +72,12 @@ def tf_coil(r_in, r_out, z_half, leg, width):
     return outer.cut(inner)
 
 
-def pf_coil(r, z, w, h):
+def pf_coil(r: float, z: float, w: float, h: float) -> cq.Workplane:
     """PF coil: just a rectangular cross-section revolved about the Z axis."""
     return revolve(rect(r - w / 2, r + w / 2, z - h / 2, z + h / 2))
 
 
-def main():
+def main() -> None:
     plasma, layers, offset = build_layers()
     z_max = KAPPA * A + offset
 
