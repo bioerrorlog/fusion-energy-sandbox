@@ -101,7 +101,7 @@ def main():
     ]):
         asm.add(pf_coil(r, z, w, h), name=f"pf_{i}", color=cq.Color("blue"))
 
-    asm.save("tokamak.step")
+    asm.export("tokamak.step")
     print("wrote tokamak.step")
 
     show(asm)
