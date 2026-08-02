@@ -3,6 +3,7 @@ import cadquery as cq
 from cadquery.vis import show
 
 
+# Parameters (cm)
 R0 = 300        # major radius
 A = 100         # plasma minor radius
 KAPPA = 1.8     # elongation
