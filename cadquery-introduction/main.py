@@ -37,5 +37,9 @@ if __name__ == "__main__":
     # show(assembly())
 
     assembly().export('my-cad-geometry.step')
-    loaded_shape = cq.importers.importStep('my-cad-geometry.step')
-    show(loaded_shape)
+
+    # loaded_shape = cq.importers.importStep('my-cad-geometry.step')
+    # show(loaded_shape)
+
+    loaded_assembly = cq.Assembly.importStep('my-cad-geometry.step')
+    show(loaded_assembly)
