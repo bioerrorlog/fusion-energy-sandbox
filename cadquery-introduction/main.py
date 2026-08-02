@@ -23,7 +23,15 @@ def cut_spline() -> cq.Workplane:
     return cut_spline
 
 
+def assembly() -> cq.Assembly:
+    assembly = cq.Assembly()
+    assembly.add(circle_solid(), color=cq.Color("red"))
+    assembly.add(cut_spline(), color=cq.Color("blue"))
+    return assembly
+
+
 if __name__ == "__main__":
     # show(circle_solid())
     # show(spine_solid())
-    show(cut_spline())
+    # show(cut_spline())
+    show(assembly())
